@@ -1,0 +1,41 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "challenge-the-design",
+  "version": "0.1.0",
+  "description": "Review the problem, assumptions, and proposed design before checking whether the implementation delivers its guarantees.",
+  "author": {
+    "name": "Pierre Brunelle",
+    "url": "https://github.com/pierrebrunelle"
+  },
+  "homepage": "https://github.com/pierrebrunelle/challenge-the-design",
+  "repository": "https://github.com/pierrebrunelle/challenge-the-design",
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "design-review",
+    "first-principles",
+    "agent-skill"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Challenge the Design",
+        "shortDescription": "Question the problem, assumptions, and proposed design",
+        "longDescription": "Review a PR, diff, or design from the affected job and required guarantees. Challenge the requirement, remove unnecessary mechanisms, compare viable alternatives, test assumptions, and check the implementation. Keep sound designs when their guarantees justify their cost.",
+        "developerName": "Pierre Brunelle",
+        "category": "Developer Tools",
+        "capabilities": [
+          "Read"
+        ],
+        "websiteURL": "https://github.com/pierrebrunelle/challenge-the-design",
+        "privacyPolicyURL": "https://github.com/pierrebrunelle/challenge-the-design/blob/main/SECURITY.md",
+        "termsOfServiceURL": "https://github.com/pierrebrunelle/challenge-the-design/blob/main/LICENSE",
+        "defaultPrompt": [
+          "Review this PR from first principles: challenge the problem, assumptions, and design, then check the implementation.",
+          "Which parts of this proposal are actually necessary to preserve its required guarantees?",
+          "Compare this design with the strongest viable simpler alternative and identify what would settle the decision."
+        ]
+      }
+    }
+  }
+}

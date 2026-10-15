@@ -1,0 +1,26 @@
+{
+  "name": "challenge-the-design",
+  "version": "0.1.0",
+  "description": "Review the problem, assumptions, and proposed design before checking whether the implementation delivers its guarantees.",
+  "keywords": [
+    "pi-package",
+    "code-review",
+    "design-review",
+    "first-principles",
+    "agent-skill"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pierrebrunelle/challenge-the-design.git"
+  },
+  "homepage": "https://github.com/pierrebrunelle/challenge-the-design",
+  "pi": {
+    "skills": [
+      "./skills"
+    ]
+  },
+  "scripts": {
+    "test": "python3 scripts/validate_plugin.py && python3 -m unittest discover -s tests -v"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "challenge-the-design",
+  "owner": {
+    "name": "Pierre Brunelle",
+    "url": "https://github.com/pierrebrunelle"
+  },
+  "metadata": {
+    "description": "Review the problem, assumptions, and proposed design before checking whether the implementation delivers its guarantees.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "challenge-the-design",
+      "description": "Review the problem, assumptions, and proposed design before checking whether the implementation delivers its guarantees.",
+      "category": "development",
+      "homepage": "https://github.com/pierrebrunelle/challenge-the-design",
+      "source": "./",
+      "strict": true
+    }
+  ]
+}

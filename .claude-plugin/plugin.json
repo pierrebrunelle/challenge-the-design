@@ -1,0 +1,21 @@
+{
+  "name": "challenge-the-design",
+  "version": "0.1.0",
+  "description": "Review the problem, assumptions, and proposed design before checking whether the implementation delivers its guarantees.",
+  "author": {
+    "name": "Pierre Brunelle",
+    "url": "https://github.com/pierrebrunelle"
+  },
+  "homepage": "https://github.com/pierrebrunelle/challenge-the-design",
+  "repository": "https://github.com/pierrebrunelle/challenge-the-design",
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "design-review",
+    "first-principles",
+    "agent-skill"
+  ],
+  "commands": [
+    "./commands/review-design.md"
+  ]
+}

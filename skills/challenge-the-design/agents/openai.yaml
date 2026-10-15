@@ -1,0 +1,4 @@
+interface:
+  display_name: "Challenge the Design"
+  short_description: "Question the problem, assumptions, and proposed design"
+  default_prompt: "Use $challenge-the-design to review this change from first principles, challenge its assumptions, and check the implementation."
