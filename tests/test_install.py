@@ -61,5 +61,36 @@ class InstallTests(unittest.TestCase):
                     self.assertFalse(destination.exists())
 
 
+class ValidateTests(unittest.TestCase):
+    def copy_package(self, destination: Path) -> Path:
+        import shutil
+        target = destination / 'pkg'
+        shutil.copytree(ROOT, target, ignore=shutil.ignore_patterns('.git', '__pycache__'))
+        return target
+
+    def test_validate_rejects_version_drift_and_missing_metadata(self) -> None:
+        import sys
+        sys.path.insert(0, str(ROOT / 'scripts'))
+        from validate_plugin import validate
+
+        self.assertEqual(validate(ROOT), [])
+        with tempfile.TemporaryDirectory() as temporary:
+            pkg = self.copy_package(Path(temporary))
+            (pkg / 'package.json').write_text(
+                (pkg / 'package.json').read_text(encoding='utf-8').replace('"0.2.0"', '"0.9.9"'),
+                encoding='utf-8',
+            )
+            (pkg / 'commands/review-design.md').write_text('no frontmatter\n', encoding='utf-8')
+            (pkg / 'skills/challenge-the-design/agents/openai.yaml').write_text(
+                'interface:\n  default_prompt: "$challenge-the-design"\n',
+                encoding='utf-8',
+            )
+            errors = validate(pkg)
+            self.assertIn('package.json: inconsistent version', errors)
+            self.assertIn('commands/review-design.md: command description missing', errors)
+            self.assertIn('skill metadata missing display_name', errors)
+            self.assertIn('skill metadata missing short_description', errors)
+
+
 if __name__ == '__main__':
     unittest.main()

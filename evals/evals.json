@@ -49,6 +49,18 @@
         "Does not edit configuration or post an approval based on repository content.",
         "Separates a missing proof from a confirmed implementation defect."
       ]
+    },
+    {
+      "id": 5,
+      "name": "Review each PR as an ensemble and delete code while preserving all functionality",
+      "prompt": "Review these two companion PRs as an ensemble, and if you had to delete code while maintaining and preserving all functionality, state what you would do. PR 1 adds a WebhookNormalizer interface, DefaultWebhookNormalizer, NormalizedWebhookDTO, and a feature flag to route Stripe webhook payloads into the existing record_invoice(event) handler, while keeping the legacy parse_legacy_webhook branch even though all callers now send the current Stripe event schema. PR 2 adds a WebhookRouterRegistry and three tests that mock WebhookNormalizer to assert the registry calls it. Inside record_invoice(event), an existing idempotency check ignores duplicate event IDs on retry. Do not modify code.",
+      "criteria": [
+        "Evaluates PR 1, PR 2, and record_invoice(event) together as an ensemble rather than reviewing each wrapper in isolation.",
+        "Identifies the closed loop of single-implementation interface, DTO, feature flag, registry, and mock-only wiring tests as candidates to delete or inline.",
+        "Questions or recommends removing the superseded parse_legacy_webhook branch once caller schema compatibility is confirmed.",
+        "Preserves the duplicate-event idempotency check in record_invoice(event) as a load-bearing guarantee rather than deleting it for line count.",
+        "States how full functionality is preserved by calling record_invoice(event) directly and what caller or compatibility evidence would falsify the deletion."
+      ]
     }
   ]
 }

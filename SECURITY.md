@@ -15,4 +15,4 @@ https://github.com/pierrebrunelle/challenge-the-design/security/advisories/new
 
 Otherwise contact the maintainer through their GitHub profile before sharing
 sensitive reproduction details. Public issues are suitable for non-sensitive bugs
-in the review procedure or package. Version 0.1.x is the initial supported series.
+in the review procedure or package. Version 0.2.x is the current supported series.

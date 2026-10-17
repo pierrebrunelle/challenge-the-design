@@ -1,15 +1,19 @@
 # Challenge the Design
 
-Review the problem and chosen mechanism before checking whether the code works.
+Review each PR as an ensemble, and ask what code you would delete while maintaining
+and preserving all functionality, before checking whether the code works.
 
-The reviewer reconstructs the affected person's job, separates requirements from
-assumptions, asks what can be removed, and compares the proposal with viable simpler
+The reviewer reads the whole change alongside its callers, state, and tests (and
+across related PRs when reviewing a stack or series), reconstructs the affected
+person's job, separates requirements from assumptions, runs a behavior-preserving
+deletion pass across the ensemble, and compares the proposal with viable simpler
 alternatives under the same guarantees. It then checks implementation correctness
 and the evidence behind the tests.
 
-A design objection needs a premise, consequence, and supporting evidence. The
-reviewer also challenges its own alternative: what would it lose, and what evidence
-would show the author is right? A sound design can survive the review unchanged.
+A design objection or deletion proposal needs a premise, consequence, and supporting
+evidence. The reviewer also challenges its own alternative: what would it lose, and
+what evidence would show the author is right? A sound design can survive the review
+unchanged.
 
 ## Install the skill
 
@@ -17,8 +21,8 @@ would show the author is right? A sound design can survive the review unchanged.
 npx skills add pierrebrunelle/challenge-the-design
 ```
 
-For Codex, invoke `$challenge-the-design` with a PR, diff, or design. Other skill
-hosts can load the same folder:
+For Codex, invoke `$challenge-the-design` with a PR, PR stack, diff, or design.
+Other skill hosts can load the same folder:
 [skills/challenge-the-design](skills/challenge-the-design).
 
 From a cloned checkout, `./install.sh --platform codex-skill` installs the standalone
@@ -40,7 +44,7 @@ server or subagents. Native marketplace options:
 ```text
 /plugin marketplace add pierrebrunelle/challenge-the-design
 /plugin install challenge-the-design@challenge-the-design
-/challenge-the-design:review-design <PR URL or design>
+/challenge-the-design:review-design <PR URL(s) or design>
 ```
 
 **Codex**
@@ -56,18 +60,21 @@ direct distribution; they do not publish the plugin to a public directory.
 ## Use it
 
 ```text
-Use $challenge-the-design to review this PR.
+Use $challenge-the-design to review each PR as an ensemble.
 
 Establish the problem and required guarantees before accepting the proposed
-mechanism. Challenge consequential assumptions, look for scope to remove, and
-compare viable alternatives under the same constraints. Name what would falsify
-your recommendation. Then check correctness and verification of the implementation.
+mechanism. Ask: if you had to delete code while maintaining and preserving all
+functionality, what would you do? Challenge consequential assumptions, compare
+viable simpler alternatives under the same constraints, and name what would
+falsify your recommendation. Then check correctness and verification of the
+implementation.
 ```
 
 The review follows five questions:
 
 1. Is the requirement supported by the caller's actual job and observable problem?
-2. What can be deleted or reused while preserving the required behavior?
+2. Viewed as an ensemble, if you had to delete code while maintaining and preserving
+   all functionality and guarantees, what would you delete, inline, or reuse?
 3. Which design best addresses the binding constraint and its failure modes?
 4. What small check could settle the consequential uncertainty?
 5. If automation is proposed, is the underlying work necessary and understood?
@@ -77,8 +84,11 @@ explanation, options, constraints, risk, choice, falsifier, and verification.
 
 ## What comes back
 
-- A brief design assessment: what is established, what is assumed, and whether the
-  approach is justified.
+- A brief ensemble design assessment: what is established, what is assumed, how the
+  parts of the PR (or PR set) fit together, and whether the approach is justified.
+- A behavior-preserving deletion plan: specific files, abstractions, branches, or
+  cross-PR layers that can be deleted or collapsed while keeping all functionality
+  and guarantees intact (or why the current pieces are load-bearing).
 - Supported design objections and implementation findings with locations,
   consequences, verification status, and suitable corrections or next checks.
 - Maintenance suggestions and unresolved questions kept distinct from defects.

@@ -1,16 +1,18 @@
 ---
 name: challenge-the-design
 description: >
-  Review a PR, diff, or proposed software design from first principles. Challenge
-  the requirement, assumptions, scope, and mechanism; compare viable simpler
-  alternatives under the same guarantees, then check implementation correctness.
-  Use for design-oriented code review, architecture review, and questions about
-  whether a proposal is necessary or overengineered. General implementation work
-  and standalone usability sessions do not require this workflow.
+  Review a PR, PR stack, diff, or proposed software design from first principles.
+  Review each PR as an ensemble, challenge the requirement, assumptions, scope,
+  and mechanism, and ask what code you would delete while maintaining and
+  preserving all functionality and guarantees; then check implementation
+  correctness. Use for design-oriented code review, ensemble PR review,
+  behavior-preserving simplification, and architecture review. General
+  implementation work and standalone usability sessions do not require this
+  workflow.
 license: MIT
 metadata:
   author: Pierre Brunelle
-  version: 0.1.0
+  version: 0.2.0
 ---
 
 # Code Review: Challenge the Design
@@ -19,8 +21,8 @@ metadata:
 
 Act as an engineering reviewer responsible for whether the proposed change solves
 the right problem with a justified design, and whether its implementation delivers
-the required behavior. Examine the problem, assumptions, scope and mechanism before
-accepting the proposal's framing.
+the required behavior. Examine the problem, assumptions, scope and mechanism across
+the whole change before accepting the proposal's framing.
 
 Prefer correctness, user value, clarity, maintainability and truth over speed,
 cleverness, politics or sunk cost. Effort already spent does not establish necessity.
@@ -39,6 +41,14 @@ existing implementation. Record the intended base, reviewed base/head commits an
 merge base when available. Separate upstream work and unrelated local changes from
 the proposed change. For related repositories, check actual dependency pins and
 compatibility constraints. Identify inaccessible evidence and unreviewed scope.
+
+Review each PR as an ensemble rather than a sequence of isolated diff hunks. Read
+the touched files at head alongside their base versions, callers, types,
+configuration, persistence and tests so the full path from entry point to effect is
+visible at once. When several PRs, commits or companion changes belong to one effort,
+review each PR both on its own terms and as part of the combined ensemble: check
+where changes across files or PRs duplicate plumbing, stack adapters, split one
+responsibility across layers or leave transitional scaffolding behind.
 
 Reconstruct the problem from the caller's job and current behavior before adopting
 the proposed mechanism as the solution. Distinguish explicit requirements, inferred
@@ -81,6 +91,27 @@ behavior, a direct correction or reuse of an existing primitive, and the propose
 approach when those are viable alternatives. Compare only as many options as the
 decision warrants; do not invent alternatives to fill a quota.
 
+Run an explicit forced-deletion pass across the ensemble: if you had to delete code
+from this PR (and the touched path around it) while maintaining and preserving all
+functionality and guarantees, what would you do? Treat observable behavior, public
+contracts, recovery properties and security boundaries as fixed invariants, and
+treat the code in the ensemble as expendable. Look specifically for:
+
+- **Closed loops inside the ensemble:** interfaces with one implementation, DTOs or
+  mappers that mirror an existing model, single-caller helpers that hide linear flow,
+  registries or builders for a static graph, and tests that only exercise internal
+  wiring of that loop.
+- **Pass-through plumbing and parallel paths:** wrappers, flags, configuration keys or
+  adapter layers that forward values without enforcing an invariant, or duplicate
+  validation, serialization, retry or error-mapping logic across files or related PRs.
+- **Superseded paths and transitional scaffolding:** legacy branches, compatibility
+  shims, shadow fields or fallback code that the PR's unified path makes redundant.
+- **Caller-side workarounds for a narrow boundary:** repeated pre-checks, conversions
+  or post-filters across callers that disappear when the shared function owns the
+  contract directly.
+- **Derived state stored as primary state:** persisted fields, caches or status flags
+  that duplicate an existing source of truth and need synchronization to stay aligned.
+
 For each substantial feature, abstraction, helper, dependency, persisted field,
 process or defensive branch, ask:
 
@@ -95,9 +126,13 @@ which needs a coordinator, does not establish the need for any of them. Challeng
 the chain's premise. Equally, a guarantee may require several cooperating blocks;
 judge their contribution to that guarantee rather than demanding standalone value.
 
-Recommend deletion or consolidation only with the behavior it must preserve and
-the tradeoff it introduces. Include shifted manual work and lost recovery,
-compatibility or isolation guarantees. Keep unrelated cleanup separate.
+Maintaining and preserving all functionality is a hard constraint. Do not count
+syntax golf, dense one-liners, stripped boundary validation, weakened error handling,
+dropped crash/retry/idempotency guarantees, broken public compatibility or deleted
+behavioral tests as simplification. Recommend deletion or consolidation only with:
+what to remove or inline, what existing primitive or direct path absorbs its job,
+why all required functionality and guarantees hold, and what would falsify the
+deletion. Keep unrelated cleanup separate.
 
 ## 3. Simplify around the actual constraint
 
@@ -105,10 +140,11 @@ Identify the binding constraint from evidence: correctness, latency, throughput,
 resource cost, delivery time, operability, compatibility or another concrete limit.
 Assess whether the design improves that constraint enough to justify its costs.
 
-Examine where state and authority live. What is the source of truth? Who owns a
-mutation? Which invariants must survive partial failure? Does the proposal add
-duplicated state, synchronization, lifecycle states, retries or trust boundaries
-because the requirement needs them, or to compensate for an avoidable design choice?
+Examine where state and authority live across the ensemble. What is the source of
+truth? Who owns a mutation? Which invariants must survive partial failure? Does the
+proposal add duplicated state, synchronization, lifecycle states, retries or trust
+boundaries because the requirement needs them, or to compensate for an avoidable
+design choice?
 
 Compare the proposal with the strongest viable simpler alternative under the same
 requirements. Include correctness, failure recovery, migration, ongoing operation,
@@ -191,20 +227,26 @@ to make uncertain judgments look quantitative. Make significant assumptions visi
 
 ## Deliver the review
 
-Give a brief design assessment before local findings: is the problem established,
-is the approach justified, and which assumption or tradeoff determines the verdict?
-Explain when the proposed design should stand. An empty bug list does not establish
-design quality, and questioning a design does not establish that it is wrong.
+Give a brief ensemble design assessment before local findings: is the problem
+established, how do the parts of the PR (or PR set) fit together as a whole, is the
+approach justified, and which assumption or tradeoff determines the verdict? Answer
+the forced-deletion question directly: if you had to delete code while maintaining
+and preserving all functionality and guarantees, what would you delete, inline or
+collapse, and what absorbs its job? When nothing can be removed without losing a
+required guarantee, say so and name why the current pieces are load-bearing. An empty
+bug list does not establish design quality, and questioning a design does not
+establish that it is wrong.
 
-Distinguish supported design objections, implementation defects, optional maintenance
-suggestions and unresolved questions. Present consequential concerns first. For each,
-provide:
+Distinguish supported design objections, behavior-preserving deletions,
+implementation defects, optional maintenance suggestions and unresolved questions.
+Present consequential concerns first. For each, provide:
 
 - The precise file/block, design section or requirement at the reviewed revision.
 - The premise or guarantee being challenged and the evidence for the concern.
 - The triggering condition or decision consequence, with concrete impact.
-- A counterexample or viable alternative where relevant, including preserved and
-  lost guarantees. Otherwise name the smallest check needed to settle the question.
+- A counterexample, deletion/consolidation plan or viable alternative where relevant,
+  including how all required guarantees are preserved (or what would be lost).
+  Otherwise name the smallest check needed to settle the question.
 - Verification status, uncertainty and the smallest suitable correction or next step.
 
 A design objection can be established by a contradiction, counterexample or
@@ -214,9 +256,9 @@ suggestion. Identify when an unresolved question must be answered before commitm
 Do not inflate severity, duplicate comments or block a focused change on unrelated debt.
 
 Before delivery, challenge your own review: did you adopt the proposal's framing,
-invent a requirement, miss a valid constraint, exaggerate impact, or recommend an
-alternative that loses a necessary guarantee? What would convince you the author
-is right? Narrow or remove claims that do not survive this pass.
+invent a requirement, miss a valid constraint, exaggerate impact, or recommend a
+deletion or alternative that loses a necessary guarantee? What would convince you
+the author is right? Narrow or remove claims that do not survive this pass.
 
 Finish with the reviewed scope/revisions, verification limits and unresolved
 decisions. Keep the final review concise; provide the expanded file-by-file map

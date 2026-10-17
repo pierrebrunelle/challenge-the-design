@@ -1,7 +1,7 @@
 {
   "name": "challenge-the-design",
-  "version": "0.1.0",
-  "description": "Review the problem, assumptions, and proposed design before checking whether the implementation delivers its guarantees.",
+  "version": "0.2.0",
+  "description": "Review each PR as an ensemble: challenge the problem, assumptions, and design, identify what code to delete while preserving all functionality, and check the implementation.",
   "author": {
     "name": "Pierre Brunelle",
     "url": "https://github.com/pierrebrunelle"
@@ -12,6 +12,8 @@
   "keywords": [
     "code-review",
     "design-review",
+    "ensemble-review",
+    "simplification",
     "first-principles",
     "agent-skill"
   ],

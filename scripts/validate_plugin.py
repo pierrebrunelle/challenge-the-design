@@ -22,7 +22,8 @@ MANIFESTS = (
 )
 
 
-def validate() -> list[str]:
+def validate(root: Path = ROOT) -> list[str]:
+    root = root.resolve()
     errors: list[str] = []
 
     def check(condition: bool, message: str) -> None:
@@ -31,7 +32,7 @@ def validate() -> list[str]:
 
     def load(relative: str) -> dict[str, Any]:
         try:
-            data = json.loads((ROOT / relative).read_text(encoding='utf-8'))
+            data = json.loads((root / relative).read_text(encoding='utf-8'))
             if not isinstance(data, dict):
                 raise ValueError('expected an object')
             return data
@@ -43,8 +44,8 @@ def validate() -> list[str]:
         if not isinstance(value, str):
             errors.append(f'{location}: expected a local path')
             return
-        path = (ROOT / value).resolve()
-        check(path.is_relative_to(ROOT), f'{location}: path escapes package: {value}')
+        path = (root / value).resolve()
+        check(path.is_relative_to(root), f'{location}: path escapes package: {value}')
         check(path.is_dir() if directory else path.is_file(), f'{location}: missing path: {value}')
 
     parsed = {relative: load(relative) for relative in MANIFESTS}
@@ -87,7 +88,7 @@ def validate() -> list[str]:
             source = source.get('path') if isinstance(source, dict) else None
         check(source == './', f'{relative}: source must be the package root')
 
-    skill_files = list((ROOT / 'skills').glob('*/SKILL.md'))
+    skill_files = list((root / 'skills').glob('*/SKILL.md'))
     check(len(skill_files) == 1, 'expected exactly one skill')
     for skill_file in skill_files:
         content = skill_file.read_text(encoding='utf-8')
@@ -99,19 +100,27 @@ def validate() -> list[str]:
         check(bool(re.search(rf'^  version: {re.escape(str(version))}$', matter, re.MULTILINE)), 'skill version differs')
         check(len(content.splitlines()) < 500, 'skill must stay under 500 lines')
         check('[TODO:' not in content, 'skill has unfinished scaffold content')
-        local_path(str(skill_file.parent.relative_to(ROOT) / 'agents/openai.yaml'), 'skill metadata')
+        local_path(str(skill_file.parent.relative_to(root) / 'agents/openai.yaml'), 'skill metadata')
         metadata = (skill_file.parent / 'agents/openai.yaml').read_text(encoding='utf-8')
+        check('display_name:' in metadata, 'skill metadata missing display_name')
+        check('short_description:' in metadata, 'skill metadata missing short_description')
         check(f'${NAME}' in metadata, 'skill default prompt must name the skill')
 
-    for document in ROOT.rglob('*.md'):
-        if any(part.startswith('.') for part in document.relative_to(ROOT).parts):
+    for command_file in (root / 'commands').glob('*.md'):
+        command_text = command_file.read_text(encoding='utf-8')
+        command_match = re.match(r'\A---\n(.*?)\n---\n', command_text, re.DOTALL)
+        check(command_match is not None and 'description:' in command_match.group(1),
+              f'{command_file.relative_to(root)}: command description missing')
+
+    for document in root.rglob('*.md'):
+        if any(part.startswith('.') for part in document.relative_to(root).parts):
             continue
         for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', document.read_text(encoding='utf-8')):
             if '://' in target or target.startswith('#'):
                 continue
             path = (document.parent / target.split('#')[0]).resolve()
-            check(path.is_relative_to(ROOT) and path.exists(),
-                  f'{document.relative_to(ROOT)}: unresolved local link {target}')
+            check(path.is_relative_to(root) and path.exists(),
+                  f'{document.relative_to(root)}: unresolved local link {target}')
 
     evaluations = load('evals/evals.json')
     check(evaluations.get('skill_name') == NAME, 'evaluation skill name differs')

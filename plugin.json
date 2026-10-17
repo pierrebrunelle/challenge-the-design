@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "challenge-the-design",
-  "version": "0.1.0",
-  "description": "Review the problem, assumptions, and proposed design before checking whether the implementation delivers its guarantees.",
+  "version": "0.2.0",
+  "description": "Review each PR as an ensemble: challenge the problem, assumptions, and design, identify what code to delete while preserving all functionality, and check the implementation.",
   "author": {
     "name": "Pierre Brunelle",
     "url": "https://github.com/pierrebrunelle"
@@ -13,6 +13,8 @@
   "keywords": [
     "code-review",
     "design-review",
+    "ensemble-review",
+    "simplification",
     "first-principles",
     "agent-skill"
   ],
@@ -20,8 +22,8 @@
     "com.openai": {
       "interface": {
         "displayName": "Challenge the Design",
-        "shortDescription": "Question the problem, assumptions, and proposed design",
-        "longDescription": "Review a PR, diff, or design from the affected job and required guarantees. Challenge the requirement, remove unnecessary mechanisms, compare viable alternatives, test assumptions, and check the implementation. Keep sound designs when their guarantees justify their cost.",
+        "shortDescription": "Review PRs as an ensemble, challenge the design, and delete unnecessary code",
+        "longDescription": "Review each PR (or set of PRs) as an ensemble from the affected job and required guarantees. Challenge the requirement, ask what code you would delete while maintaining and preserving all functionality, compare viable alternatives, test assumptions, and check the implementation. Keep sound designs when their guarantees justify their cost.",
         "developerName": "Pierre Brunelle",
         "category": "Developer Tools",
         "capabilities": [
@@ -31,9 +33,9 @@
         "privacyPolicyURL": "https://github.com/pierrebrunelle/challenge-the-design/blob/main/SECURITY.md",
         "termsOfServiceURL": "https://github.com/pierrebrunelle/challenge-the-design/blob/main/LICENSE",
         "defaultPrompt": [
+          "Review each PR as an ensemble, and if you had to delete code while maintaining and preserving all functionality, what would you do?",
           "Review this PR from first principles: challenge the problem, assumptions, and design, then check the implementation.",
-          "Which parts of this proposal are actually necessary to preserve its required guarantees?",
-          "Compare this design with the strongest viable simpler alternative and identify what would settle the decision."
+          "Compare this design with the strongest viable simpler alternative under the same guarantees and identify what would settle the decision."
         ]
       }
     }
