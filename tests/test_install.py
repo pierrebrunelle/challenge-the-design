@@ -68,7 +68,8 @@ class ValidateTests(unittest.TestCase):
         shutil.copytree(ROOT, target, ignore=shutil.ignore_patterns('.git', '__pycache__'))
         return target
 
-    def test_validate_rejects_version_drift_and_missing_metadata(self) -> None:
+    def test_validate_rejects_version_description_keyword_and_security_drift(self) -> None:
+        import json
         import sys
         sys.path.insert(0, str(ROOT / 'scripts'))
         from validate_plugin import validate
@@ -76,20 +77,53 @@ class ValidateTests(unittest.TestCase):
         self.assertEqual(validate(ROOT), [])
         with tempfile.TemporaryDirectory() as temporary:
             pkg = self.copy_package(Path(temporary))
-            (pkg / 'package.json').write_text(
-                (pkg / 'package.json').read_text(encoding='utf-8').replace('"0.2.0"', '"0.9.9"'),
+            pkg_json = json.loads((pkg / 'package.json').read_text(encoding='utf-8'))
+            pkg_json['version'] = '0.9.9'
+            pkg_json['keywords'] = ['pi-package']
+            (pkg / 'package.json').write_text(json.dumps(pkg_json), encoding='utf-8')
+            cursor_json = json.loads((pkg / '.cursor-plugin/plugin.json').read_text(encoding='utf-8'))
+            cursor_json['description'] = 'stale description'
+            (pkg / '.cursor-plugin/plugin.json').write_text(json.dumps(cursor_json), encoding='utf-8')
+            (pkg / 'SECURITY.md').write_text('Version 0.1.x is the current supported series.\n', encoding='utf-8')
+            errors = validate(pkg)
+            self.assertIn('package.json: inconsistent version', errors)
+            self.assertIn('package.json: inconsistent keywords', errors)
+            self.assertIn('.cursor-plugin/plugin.json: inconsistent description', errors)
+            self.assertIn('SECURITY.md: supported version series differs', errors)
+
+    def test_validate_handles_missing_or_commented_metadata_and_malformed_evals(self) -> None:
+        import json
+        import sys
+        sys.path.insert(0, str(ROOT / 'scripts'))
+        from validate_plugin import validate
+
+        with tempfile.TemporaryDirectory() as temporary:
+            pkg = self.copy_package(Path(temporary))
+            (pkg / 'skills/challenge-the-design/agents/openai.yaml').unlink()
+            errors = validate(pkg)
+            self.assertIn('skill metadata: missing path: skills/challenge-the-design/agents/openai.yaml', errors)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            pkg = self.copy_package(Path(temporary))
+            (pkg / 'commands/review-design.md').write_text(
+                '---\n# description: commented out\n---\nbody\n',
                 encoding='utf-8',
             )
-            (pkg / 'commands/review-design.md').write_text('no frontmatter\n', encoding='utf-8')
             (pkg / 'skills/challenge-the-design/agents/openai.yaml').write_text(
-                'interface:\n  default_prompt: "$challenge-the-design"\n',
+                '# display_name: "x"\n# short_description: "y"\n# $challenge-the-design\n',
+                encoding='utf-8',
+            )
+            (pkg / 'evals/evals.json').write_text(
+                json.dumps({'skill_name': 'challenge-the-design', 'evals': [{'prompt': 'p', 'criteria': ['']}]}),
                 encoding='utf-8',
             )
             errors = validate(pkg)
-            self.assertIn('package.json: inconsistent version', errors)
             self.assertIn('commands/review-design.md: command description missing', errors)
             self.assertIn('skill metadata missing display_name', errors)
             self.assertIn('skill metadata missing short_description', errors)
+            self.assertIn('skill default prompt must name the skill', errors)
+            self.assertIn('evaluation IDs must be unique integers', errors)
+            self.assertIn('evaluation needs name, input prompt, and non-empty grading criteria list', errors)
 
 
 if __name__ == '__main__':

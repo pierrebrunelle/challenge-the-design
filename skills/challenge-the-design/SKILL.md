@@ -45,10 +45,11 @@ compatibility constraints. Identify inaccessible evidence and unreviewed scope.
 Review each PR as an ensemble rather than a sequence of isolated diff hunks. Read
 the touched files at head alongside their base versions, callers, types,
 configuration, persistence and tests so the full path from entry point to effect is
-visible at once. When several PRs, commits or companion changes belong to one effort,
-review each PR both on its own terms and as part of the combined ensemble: check
-where changes across files or PRs duplicate plumbing, stack adapters, split one
-responsibility across layers or leave transitional scaffolding behind.
+visible at once. When multiple PRs, commits or companion changes are in scope,
+review each PR both as a complete ensemble on its own terms and as part of the
+combined ensemble: check where changes across files or PRs duplicate plumbing,
+stack adapters, split one responsibility across layers or leave transitional
+scaffolding behind.
 
 Reconstruct the problem from the caller's job and current behavior before adopting
 the proposed mechanism as the solution. Distinguish explicit requirements, inferred
@@ -93,17 +94,22 @@ decision warrants; do not invent alternatives to fill a quota.
 
 Run an explicit forced-deletion pass across the ensemble: if you had to delete code
 from this PR (and the touched path around it) while maintaining and preserving all
-functionality and guarantees, what would you do? Treat observable behavior, public
-contracts, recovery properties and security boundaries as fixed invariants, and
-treat the code in the ensemble as expendable. Look specifically for:
+functionality and guarantees, what would you do? First pin the contract to preserve
+(entry points, observable outputs and side effects, error/retry/idempotency
+semantics, security/auth boundaries and caller compatibility), then trace the
+shortest direct path from entry point to effect and treat every intermediate layer
+in the ensemble as expendable. Look specifically for:
 
-- **Closed loops inside the ensemble:** interfaces with one implementation, DTOs or
-  mappers that mirror an existing model, single-caller helpers that hide linear flow,
-  registries or builders for a static graph, and tests that only exercise internal
-  wiring of that loop.
+- **Closed loops and speculative generality:** interfaces with one implementation,
+  DTOs or mappers that mirror an existing model, single-caller helpers that hide
+  linear flow, registries or builders for a static graph, options or strategy hooks
+  with one production value, and tests that only exercise internal loop wiring.
 - **Pass-through plumbing and parallel paths:** wrappers, flags, configuration keys or
   adapter layers that forward values without enforcing an invariant, or duplicate
   validation, serialization, retry or error-mapping logic across files or related PRs.
+- **Bespoke mechanisms duplicating an existing primitive:** custom queues, locks,
+  caches, retry loops, parsers or reconcilers when an existing database transaction,
+  runtime primitive, library function or shared helper already provides the guarantee.
 - **Superseded paths and transitional scaffolding:** legacy branches, compatibility
   shims, shadow fields or fallback code that the PR's unified path makes redundant.
 - **Caller-side workarounds for a narrow boundary:** repeated pre-checks, conversions
@@ -230,12 +236,13 @@ to make uncertain judgments look quantitative. Make significant assumptions visi
 Give a brief ensemble design assessment before local findings: is the problem
 established, how do the parts of the PR (or PR set) fit together as a whole, is the
 approach justified, and which assumption or tradeoff determines the verdict? Answer
-the forced-deletion question directly: if you had to delete code while maintaining
-and preserving all functionality and guarantees, what would you delete, inline or
-collapse, and what absorbs its job? When nothing can be removed without losing a
-required guarantee, say so and name why the current pieces are load-bearing. An empty
-bug list does not establish design quality, and questioning a design does not
-establish that it is wrong.
+the forced-deletion question directly (for each PR and across the set when multiple
+PRs are in scope): if you had to delete code while maintaining and preserving all
+functionality and guarantees, what would you delete, inline or collapse, and what
+absorbs its job? When nothing can be removed without losing a required guarantee,
+say so and name why the current pieces are load-bearing. An empty bug list does not
+establish design quality, and questioning a design does not establish that it is
+wrong.
 
 Distinguish supported design objections, behavior-preserving deletions,
 implementation defects, optional maintenance suggestions and unresolved questions.
