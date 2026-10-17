@@ -21,9 +21,9 @@ unchanged.
 npx skills add pierrebrunelle/challenge-the-design
 ```
 
-For Codex, invoke `$challenge-the-design` with a PR, PR stack, diff, or design.
-Other skill hosts can load the same folder:
-[skills/challenge-the-design](skills/challenge-the-design).
+For Codex, invoke `$challenge-the-design` with a PR, PR stack, branch, diff, or
+design, or with no arguments for the current branch. Other skill hosts can load the
+same folder: [skills/challenge-the-design](skills/challenge-the-design).
 
 From a cloned checkout, `./install.sh --platform codex-skill` installs the standalone
 skill. The installer also supports `cursor-skill`, `claude-code`, and `antigravity`.
@@ -44,7 +44,6 @@ server or subagents. Native marketplace options:
 ```text
 /plugin marketplace add pierrebrunelle/challenge-the-design
 /plugin install challenge-the-design@challenge-the-design
-/challenge-the-design:review-design <PR URL(s) or design>
 ```
 
 **Codex**
@@ -68,9 +67,9 @@ $challenge-the-design
 $challenge-the-design <PR URL(s), branch, diff, or design>
 ```
 
-In Claude Code marketplace installs, the plugin command is
-`/challenge-the-design:review-design`. With no arguments, it inspects the current
-branch or workspace changes.
+With no arguments, either form inspects the current branch or workspace changes. In
+Claude Code marketplace installs, the namespaced plugin command is
+`/challenge-the-design:review-design`.
 
 The skill carries the full ensemble review and forced-deletion procedure through
 five questions:

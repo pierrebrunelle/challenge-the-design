@@ -33,9 +33,9 @@
         "privacyPolicyURL": "https://github.com/pierrebrunelle/challenge-the-design/blob/main/SECURITY.md",
         "termsOfServiceURL": "https://github.com/pierrebrunelle/challenge-the-design/blob/main/LICENSE",
         "defaultPrompt": [
-          "Review each PR as an ensemble, and if you had to delete code while maintaining and preserving all functionality, what would you do?",
-          "Review this PR from first principles: challenge the problem, assumptions, and design, then check the implementation.",
-          "Compare this design with the strongest viable simpler alternative under the same guarantees and identify what would settle the decision."
+          "Use $challenge-the-design to review this PR.",
+          "Use $challenge-the-design to review these companion PRs.",
+          "Use $challenge-the-design to challenge this design."
         ]
       }
     }

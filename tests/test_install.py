@@ -117,11 +117,17 @@ class ValidateTests(unittest.TestCase):
                 json.dumps({'skill_name': 'challenge-the-design', 'evals': [{'prompt': 'p', 'criteria': ['']}]}),
                 encoding='utf-8',
             )
+            plugin_json = json.loads((pkg / 'plugin.json').read_text(encoding='utf-8'))
+            plugin_json['extensions']['com.openai']['interface']['defaultPrompt'] = ['x' * 120]
+            (pkg / 'plugin.json').write_text(json.dumps(plugin_json), encoding='utf-8')
+            (pkg / 'README.md').write_text('# Stub\n', encoding='utf-8')
             errors = validate(pkg)
             self.assertIn('commands/review-design.md: command description missing', errors)
             self.assertIn('skill metadata missing display_name', errors)
             self.assertIn('skill metadata missing short_description', errors)
-            self.assertIn('skill default prompt must name the skill', errors)
+            self.assertIn('skill default prompt must concisely name the skill', errors)
+            self.assertIn('plugin.json: defaultPrompt must be concise starter prompts naming the skill', errors)
+            self.assertIn('README.md: must document /review-design and $challenge-the-design invocations', errors)
             self.assertIn('evaluation IDs must be unique integers', errors)
             self.assertIn('evaluation needs name, input prompt, and non-empty grading criteria list', errors)
 

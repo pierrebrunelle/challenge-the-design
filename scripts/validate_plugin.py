@@ -158,7 +158,14 @@ def validate(root: Path = ROOT) -> list[str]:
     codex = parsed['.codex-plugin/plugin.json']
     extensions = portable.get('extensions') if isinstance(portable.get('extensions'), dict) else {}
     openai_ext = extensions.get('com.openai') if isinstance(extensions.get('com.openai'), dict) else {}
-    check(openai_ext.get('interface') == codex.get('interface'), 'portable and Codex interfaces differ')
+    openai_iface = openai_ext.get('interface') if isinstance(openai_ext.get('interface'), dict) else {}
+    check(openai_iface == codex.get('interface'), 'portable and Codex interfaces differ')
+    starter_prompts = openai_iface.get('defaultPrompt')
+    check(
+        isinstance(starter_prompts, list) and bool(starter_prompts)
+        and all(isinstance(p, str) and f'${NAME}' in p and len(p) <= 80 for p in starter_prompts),
+        'plugin.json: defaultPrompt must be concise starter prompts naming the skill',
+    )
     check(codex.get('skills') == './skills/', 'Codex skills path must be ./skills/')
     local_path(codex.get('skills'), 'Codex skills', directory=True)
     for relative in ('.plugin/plugin.json', '.cursor-plugin/plugin.json'):
@@ -201,7 +208,10 @@ def validate(root: Path = ROOT) -> list[str]:
             check(bool(interface.get('display_name')), 'skill metadata missing display_name')
             check(bool(interface.get('short_description')), 'skill metadata missing short_description')
             prompt = interface.get('default_prompt', '')
-            check(isinstance(prompt, str) and f'${NAME}' in prompt, 'skill default prompt must name the skill')
+            check(
+                isinstance(prompt, str) and f'${NAME}' in prompt and len(prompt) <= 80,
+                'skill default prompt must concisely name the skill',
+            )
 
     command_files = list((root / 'commands').glob('*.md'))
     check(bool(command_files), 'commands: expected at least one command file')
@@ -211,6 +221,12 @@ def validate(root: Path = ROOT) -> list[str]:
         command_matter = _parse_yaml_mapping(command_match.group(1)) if command_match else {}
         check(isinstance(command_matter.get('description'), str) and bool(command_matter['description']),
               f'{command_file.relative_to(root)}: command description missing')
+
+    readme_path = root / 'README.md'
+    if readme_path.is_file():
+        readme_text = readme_path.read_text(encoding='utf-8')
+        check('/review-design' in readme_text and f'${NAME}' in readme_text,
+              'README.md: must document /review-design and $challenge-the-design invocations')
 
     for document in root.rglob('*.md'):
         if any(part.startswith('.') for part in document.relative_to(root).parts):

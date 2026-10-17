@@ -53,7 +53,7 @@
     {
       "id": 5,
       "name": "Review companion PRs as an ensemble and delete cross-PR ceremony while preserving guarantees",
-      "prompt": "Review these two companion PRs as an ensemble, and if you had to delete code while maintaining and preserving all functionality, state what you would do. PR 1 adds a WebhookNormalizer interface, DefaultWebhookNormalizer, NormalizedWebhookDTO, and a feature flag to route Stripe webhook payloads into the existing record_invoice(event) handler, while keeping the legacy parse_legacy_webhook branch even though all callers now send the current Stripe event schema. PR 2 adds a WebhookRouterRegistry and three tests that mock WebhookNormalizer to assert the registry calls it. Inside record_invoice(event), an existing idempotency check ignores duplicate event IDs on retry. Do not modify code.",
+      "prompt": "Review these two companion PRs. PR 1 adds a WebhookNormalizer interface, DefaultWebhookNormalizer, NormalizedWebhookDTO, and a feature flag to route Stripe webhook payloads into the existing record_invoice(event) handler, while keeping the legacy parse_legacy_webhook branch even though all callers now send the current Stripe event schema. PR 2 adds a WebhookRouterRegistry and three tests that mock WebhookNormalizer to assert the registry calls it. Inside record_invoice(event), an existing idempotency check ignores duplicate event IDs on retry. Do not modify code.",
       "criteria": [
         "Evaluates PR 1, PR 2, and record_invoice(event) together as an ensemble rather than reviewing each wrapper in isolation.",
         "Identifies the closed loop of single-implementation interface, DTO, feature flag, registry, and mock-only wiring tests across PR 1 and PR 2 as candidates to delete or inline.",
@@ -65,7 +65,7 @@
     {
       "id": 6,
       "name": "Review a single PR as an ensemble and collapse caller workarounds into the shared contract",
-      "prompt": "Review this PR as an ensemble, and if you had to delete code while maintaining and preserving all functionality, state what you would do. The PR adds slug trimming and lowercase normalization across four API routes before calling get_project(org_id, slug), plus a ProjectSlugNormalizerService class, a normalize_mode parameter that every caller passes as 'strict', and a cached normalized_slug column on the projects table that a background job backfills. Inside get_project(org_id, slug), an existing check verifies that the authenticated caller belongs to org_id before querying. Do not modify code.",
+      "prompt": "Review this PR. The PR adds slug trimming and lowercase normalization across four API routes before calling get_project(org_id, slug), plus a ProjectSlugNormalizerService class, a normalize_mode parameter that every caller passes as 'strict', and a cached normalized_slug column on the projects table that a background job backfills. Inside get_project(org_id, slug), an existing check verifies that the authenticated caller belongs to org_id before querying. Do not modify code.",
       "criteria": [
         "Reviews the four routes, normalizer service, config knob, persisted column, and get_project(org_id, slug) as one end-to-end ensemble.",
         "Recommends deleting the repeated caller pre-checks, ProjectSlugNormalizerService wrapper, and single-value normalize_mode parameter by normalizing slug at the get_project boundary.",
