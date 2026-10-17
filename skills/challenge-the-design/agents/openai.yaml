@@ -1,4 +1,4 @@
 interface:
   display_name: "Challenge the Design"
   short_description: "Review PRs as an ensemble, challenge the design, and delete unnecessary code"
-  default_prompt: "Use $challenge-the-design to review each PR as an ensemble: challenge the problem and assumptions, state what code you would delete while maintaining and preserving all functionality, and check the implementation."
+  default_prompt: "Use $challenge-the-design to review this change."

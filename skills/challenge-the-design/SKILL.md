@@ -36,11 +36,14 @@ future maintainers must carry, including manual work displaced by code.
 
 ## Establish the review baseline
 
-Read applicable repository instructions, relevant docs, the ticket/design and the
-existing implementation. Record the intended base, reviewed base/head commits and
-merge base when available. Separate upstream work and unrelated local changes from
-the proposed change. For related repositories, check actual dependency pins and
-compatibility constraints. Identify inaccessible evidence and unreviewed scope.
+Use the supplied PR, PR set, branch, diff or design as the scope; when none is
+supplied, inspect the current branch or workspace for the proposed change and ask
+for a target only when it cannot be identified. Read applicable repository
+instructions, relevant docs, the ticket/design and the existing implementation.
+Record the intended base, reviewed base/head commits and merge base when available.
+Separate upstream work and unrelated local changes from the proposed change. For
+related repositories, check actual dependency pins and compatibility constraints.
+Identify inaccessible evidence and unreviewed scope.
 
 Review each PR as an ensemble rather than a sequence of isolated diff hunks. Read
 the touched files at head alongside their base versions, callers, types,

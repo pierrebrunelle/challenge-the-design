@@ -59,18 +59,21 @@ direct distribution; they do not publish the plugin to a public directory.
 
 ## Use it
 
-```text
-Use $challenge-the-design to review each PR as an ensemble.
+Run the plugin command or invoke the skill directly:
 
-Establish the problem and required guarantees before accepting the proposed
-mechanism. Ask: if you had to delete code while maintaining and preserving all
-functionality, what would you do? Challenge consequential assumptions, compare
-viable simpler alternatives under the same constraints, and name what would
-falsify your recommendation. Then check correctness and verification of the
-implementation.
+```text
+/review-design
+/review-design <PR URL(s), branch, diff, or design>
+$challenge-the-design
+$challenge-the-design <PR URL(s), branch, diff, or design>
 ```
 
-The review follows five questions:
+In Claude Code marketplace installs, the plugin command is
+`/challenge-the-design:review-design`. With no arguments, it inspects the current
+branch or workspace changes.
+
+The skill carries the full ensemble review and forced-deletion procedure through
+five questions:
 
 1. Is the requirement supported by the caller's actual job and observable problem?
 2. Viewed as an ensemble, if you had to delete code while maintaining and preserving
